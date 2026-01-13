@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mool - Video</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      width: 100%;
+    }
+    .video-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    video {
+      max-width: 100%;
+      max-height: 80vh;
+      width: 100%;
+    }
+    .error {
+      text-align: center;
+      padding: 40px;
+      color: #ff6b6b;
+    }
+    .error h1 { font-size: 1.5rem; margin-bottom: 10px; }
+    .error p { color: #888; }
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      color: #888;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #333;
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    footer {
+      text-align: center;
+      padding: 16px;
+      color: #444;
+      font-size: 0.8rem;
+    }
+    footer a { color: #666; text-decoration: none; }
+    footer a:hover { color: #888; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="video-wrapper" id="player">
+      <div class="loading">
+        <div class="spinner"></div>
+        <span>Loading video...</span>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <a href="https://github.com/anthropics/openloom" target="_blank">Mool</a> - Instant video sharing
+  </footer>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const fileId = params.get('id');
+    const player = document.getElementById('player');
+
+    function showError(title, message) {
+      player.replaceChildren();
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'error';
+      const h1 = document.createElement('h1');
+      h1.textContent = title;
+      const p = document.createElement('p');
+      p.textContent = message;
+      errorDiv.appendChild(h1);
+      errorDiv.appendChild(p);
+      player.appendChild(errorDiv);
+    }
+
+    function formatDuration(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    if (!fileId) {
+      showError('No video specified', 'Add ?id=YOUR_FILE_ID to the URL');
+    } else {
+      // Google Drive direct download URL with confirmation bypass
+      const videoUrl = `https://drive.google.com/uc?export=download&confirm=t&id=${fileId}`;
+
+      const video = document.createElement('video');
+      video.controls = true;
+      video.autoplay = true;
+      video.playsInline = true;
+      video.src = videoUrl;
+
+      video.onloadeddata = () => {
+        player.replaceChildren(video);
+        document.title = `Mool - Video (${formatDuration(video.duration)})`;
+      };
+
+      video.onerror = () => {
+        showError('Failed to load video', 'The video may not exist or isn\'t publicly shared');
+      };
+    }
+  </script>
+</body>
+</html>
