@@ -24,6 +24,19 @@
       padding-bottom: 50px;
       box-sizing: border-box;
     }
+    .header {
+      padding: 16px 20px;
+      background: #111;
+      border-bottom: 1px solid #222;
+    }
+    .filename {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
     .video-wrapper {
       flex: 1;
       display: flex;
@@ -79,6 +92,9 @@
 </head>
 <body>
   <div class="container">
+    <div class="header" id="header" style="display: none;">
+      <div class="filename" id="filename"></div>
+    </div>
     <div class="video-wrapper" id="player">
       <div class="loading">
         <div class="spinner"></div>
@@ -118,6 +134,20 @@
     } else {
       // Cloudflare Worker proxy for Google Drive (bypasses CORS)
       const videoUrl = `https://google-drive-proxy.arn-breton.workers.dev/?id=${fileId}`;
+      const metadataUrl = `https://google-drive-proxy.arn-breton.workers.dev/?id=${fileId}&metadata=1`;
+
+      // Fetch filename
+      fetch(metadataUrl)
+        .then(r => r.json())
+        .then(data => {
+          if (data.name) {
+            const name = data.name.replace(/\.[^/.]+$/, ''); // Remove extension
+            document.getElementById('filename').textContent = name;
+            document.getElementById('header').style.display = 'block';
+            document.title = `${name} - Mool`;
+          }
+        })
+        .catch(() => {}); // Ignore metadata errors
 
       const video = document.createElement('video');
       video.controls = true;
@@ -128,7 +158,6 @@
 
       video.onloadeddata = () => {
         player.replaceChildren(video);
-        document.title = `Mool - Video (${formatDuration(video.duration)})`;
         // Unmute after autoplay starts
         video.muted = false;
       };
