@@ -109,8 +109,8 @@
     if (!fileId) {
       showError('No video specified', 'Add ?id=YOUR_FILE_ID to the URL');
     } else {
-      // Google Drive direct download URL with confirmation bypass
-      const videoUrl = `https://drive.google.com/uc?export=download&confirm=t&id=${fileId}`;
+      // Cloudflare Worker proxy for Google Drive (bypasses CORS)
+      const videoUrl = `https://google-drive-proxy.arn-breton.workers.dev/?id=${fileId}`;
 
       const video = document.createElement('video');
       video.controls = true;
