@@ -115,12 +115,15 @@
       const video = document.createElement('video');
       video.controls = true;
       video.autoplay = true;
+      video.muted = true;
       video.playsInline = true;
       video.src = videoUrl;
 
       video.onloadeddata = () => {
         player.replaceChildren(video);
         document.title = `Mool - Video (${formatDuration(video.duration)})`;
+        // Unmute after autoplay starts
+        video.muted = false;
       };
 
       video.onerror = () => {
