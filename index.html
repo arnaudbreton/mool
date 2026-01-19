@@ -158,6 +158,8 @@
 
       video.oncanplay = () => {
         player.replaceChildren(video);
+        // Unmute after autoplay starts (requires muted for autoplay to work)
+        video.muted = false;
       };
 
       video.onerror = () => {
